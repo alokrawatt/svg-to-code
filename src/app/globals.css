@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
  
+@layer components {
+  .border-border {
+      border: 1px solid #ffffff; /* Customize this as needed */
+  }
+}
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -80,3 +85,4 @@
     @apply bg-background text-foreground;
   }
 }
+
