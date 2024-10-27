@@ -79,10 +79,13 @@
  
 @layer base {
   * {
-    @apply border-border;
+    /* Ensure PostCSS with Tailwind is configured to handle @apply */
+    /* @apply border-border; */
+    border: 1px solid #ffffff; /* Example fallback */
   }
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; */
+    background-color: rgb(255, 255, 255); /* Example fallback */
+    color: rgb(0, 0, 0); /* Example fallback */
   }
 }
-
