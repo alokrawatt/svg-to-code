@@ -4,78 +4,99 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ArrowLeftRight, ClipboardCopy, Upload, Download } from 'lucide-react'
 
-export default function Component() {
-  const [svgCode, setSvgCode] = useState('')
-  const [svgPreview, setSvgPreview] = useState('')
-  const [isCopied, setIsCopied] = useState(false)
+export default function SvgToCodeConverter() {
+  const [svgCode, setSvgCode] = useState<string>('')
+  const [svgPreview, setSvgPreview] = useState<string>('')
+  const [isCopied, setIsCopied] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
   const svgContainerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const validateSvgContent = (content: string): boolean => {
+    return content.trim().toLowerCase().startsWith('<svg') && content.trim().toLowerCase().endsWith('</svg>')
+  }
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      if (!file.type.includes('svg')) {
+        setError('Please upload an SVG file')
+        return
+      }
+
       const reader = new FileReader()
       reader.onload = (e) => {
         const content = e.target?.result as string
-        setSvgCode(content)
-        setSvgPreview(content)
+        if (validateSvgContent(content)) {
+          setError(null)
+          setSvgCode(content)
+          setSvgPreview(content)
+        } else {
+          setError('Invalid SVG content')
+        }
+      }
+      reader.onerror = () => {
+        setError('Error reading file')
       }
       reader.readAsText(file)
     }
   }
 
   const handleCodeChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setSvgCode(event.target.value)
-    setSvgPreview(event.target.value)
+    const content = event.target.value
+    setSvgCode(content)
+    if (content && !validateSvgContent(content)) {
+      setError('Invalid SVG content')
+    } else {
+      setError(null)
+      setSvgPreview(content)
+    }
   }
 
-  const copyToClipboard = useCallback(() => {
-    navigator.clipboard.writeText(svgCode).then(() => {
+  const copyToClipboard = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(svgCode)
       setIsCopied(true)
       setTimeout(() => setIsCopied(false), 2000)
-    }).catch(err => {
-      console.error('Failed to copy text: ', err)
-    })
+    } catch (err) {
+      setError('Failed to copy to clipboard')
+    }
   }, [svgCode])
 
   const downloadSVG = useCallback(() => {
-    const blob = new Blob([svgCode], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'image.svg'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    try {
+      const blob = new Blob([svgCode], { type: 'image/svg+xml' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'converted-image.svg'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      setError('Failed to download SVG')
+    }
   }, [svgCode])
 
   useEffect(() => {
-    if (svgContainerRef.current && svgPreview) {
-      const container = svgContainerRef.current
-      const svgElement = container.querySelector('svg')
-      if (svgElement) {
-        svgElement.setAttribute('width', '100%')
-        svgElement.setAttribute('height', '100%')
-        svgElement.style.maxWidth = '100%'
-        svgElement.style.maxHeight = '100%'
+    if (svgContainerRef.current && svgPreview && !error) {
+      try {
+        const container = svgContainerRef.current
+        container.innerHTML = svgPreview
+        const svgElement = container.querySelector('svg')
+        if (svgElement) {
+          svgElement.setAttribute('width', '100%')
+          svgElement.setAttribute('height', '100%')
+          svgElement.style.maxWidth = '100%'
+          svgElement.style.maxHeight = '100%'
+        }
+      } catch (err) {
+        setError('Error rendering SVG preview')
       }
     }
-  }, [svgPreview])
-
-  useEffect(() => {
-    const textarea = textareaRef.current
-    if (textarea) {
-      const lineNumbers = textarea.value.split('\n').map((_, index) => index + 1).join('\n')
-      textarea.style.backgroundImage = `linear-gradient(transparent, transparent calc(100% - 0.5em)), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='${textarea.scrollHeight}'><text x='0' y='15' fill='%23999' font-size='12'>${lineNumbers}</text></svg>")`
-      textarea.style.backgroundAttachment = 'local'
-      textarea.style.backgroundPosition = '0 0'
-      textarea.style.backgroundRepeat = 'no-repeat'
-      textarea.style.backgroundSize = '40px 100%'
-      textarea.style.paddingLeft = '40px'
-    }
-  }, [svgCode])
+  }, [svgPreview, error])
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -89,6 +110,11 @@ export default function Component() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4">
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
@@ -107,7 +133,10 @@ export default function Component() {
                   <span className="mt-2 text-sm">Drop SVG file here or click to upload</span>
                 </label>
               </div>
-              <Button className="w-full" onClick={() => document.getElementById('svg-upload')?.click()}>
+              <Button 
+                className="w-full" 
+                onClick={() => document.getElementById('svg-upload')?.click()}
+              >
                 Choose File
               </Button>
             </div>
@@ -120,18 +149,30 @@ export default function Component() {
               style={{ lineHeight: '1.5em' }}
             />
           </div>
-          <div className="flex justify-end mt-4">
-            <Button variant="outline" onClick={copyToClipboard}>
-              <ClipboardCopy className="mr-2 h-4 w-4" /> {isCopied ? 'Copied!' : 'Copy SVG code'}
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={copyToClipboard}
+              disabled={!svgCode || !!error}
+            >
+              <ClipboardCopy className="mr-2 h-4 w-4" />
+              {isCopied ? 'Copied!' : 'Copy SVG code'}
             </Button>
           </div>
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-2">SVG Preview</h3>
             <div className="border rounded-lg p-4 h-64 flex items-center justify-center bg-gray-100 overflow-hidden">
-              <div className="w-full h-full" ref={svgContainerRef} dangerouslySetInnerHTML={{ __html: svgPreview }} />
+              <div 
+                className="w-full h-full" 
+                ref={svgContainerRef}
+              />
             </div>
             <div className="mt-4 flex justify-center">
-              <Button variant="outline" onClick={downloadSVG}>
+              <Button 
+                variant="outline" 
+                onClick={downloadSVG}
+                disabled={!svgCode || !!error}
+              >
                 <Download className="mr-2 h-4 w-4" /> Download SVG
               </Button>
             </div>
