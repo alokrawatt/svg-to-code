@@ -14,7 +14,12 @@ export default function SvgToCodeConverter() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const validateSvgContent = (content: string): boolean => {
-    return content.trim().toLowerCase().startsWith('<svg') && content.trim().toLowerCase().endsWith('</svg>')
+    const trimmedContent = content.trim();
+    return (
+        trimmedContent.toLowerCase().startsWith('<svg') &&
+        trimmedContent.toLowerCase().endsWith('</svg>') &&
+        trimmedContent.includes('xmlns') // Check for the presence of the xmlns attribute
+    );
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,6 +33,7 @@ export default function SvgToCodeConverter() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const content = e.target?.result as string
+        console.log('Uploaded SVG content:', content)
         if (validateSvgContent(content)) {
           setError(null)
           setSvgCode(content)
