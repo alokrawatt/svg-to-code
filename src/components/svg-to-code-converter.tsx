@@ -14,11 +14,15 @@ export default function SvgToCodeConverter() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const validateSvgContent = (content: string): boolean => {
-    const trimmedContent = content.trim();
+    const trimmedContent = content.trim().replace(/<!--.*?-->/g, '');
+    const svgStart = trimmedContent.toLowerCase().indexOf('<svg');
+    const svgEnd = trimmedContent.toLowerCase().indexOf('</svg>');
+
     return (
-        trimmedContent.toLowerCase().startsWith('<svg') &&
-        trimmedContent.toLowerCase().endsWith('</svg>') &&
-        trimmedContent.includes('xmlns') // Check for the presence of the xmlns attribute
+        svgStart !== -1 &&
+        svgEnd !== -1 &&
+        svgStart < svgEnd &&
+        trimmedContent.includes('xmlns')
     );
   }
 
