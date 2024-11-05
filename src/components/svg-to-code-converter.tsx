@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ArrowLeftRight, ClipboardCopy, Upload, Download } from 'lucide-react'
+import { ArrowLeftRight, ClipboardCopy, Upload } from 'lucide-react'
 
 export default function SvgToCodeConverter() {
   const [svgCode, setSvgCode] = useState<string>('')
@@ -14,7 +14,7 @@ export default function SvgToCodeConverter() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const validateSvgContent = (content: string): boolean => {
-    const trimmedContent = content.trim().replace(/<!--.*?-->/g, '');
+    const trimmedContent = content.trim().replace(/<!--.*?-->/g, ''); // Remove comments
     const svgStart = trimmedContent.toLowerCase().indexOf('<svg');
     const svgEnd = trimmedContent.toLowerCase().indexOf('</svg>');
 
@@ -37,7 +37,7 @@ export default function SvgToCodeConverter() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const content = e.target?.result as string
-        console.log('Uploaded SVG content:', content)
+        console.log('Uploaded SVG content:', content); // Log the content for debugging
         if (validateSvgContent(content)) {
           setError(null)
           setSvgCode(content)
@@ -89,6 +89,23 @@ export default function SvgToCodeConverter() {
       setError('Failed to download SVG')
     }
   }, [svgCode])
+
+  const copyDValues = useCallback(() => {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgCode, "image/svg+xml");
+    const paths = svgDoc.getElementsByTagName("path");
+    const dValues = Array.from(paths).map((path) => path.getAttribute("d")).filter(Boolean).join(", ");
+    
+    if (dValues) {
+      navigator.clipboard.writeText(dValues).then(() => {
+        alert("Copied D values: " + dValues);
+      }).catch(() => {
+        setError('Failed to copy D values');
+      });
+    } else {
+      setError('No path elements found in SVG');
+    }
+  }, [svgCode]);
 
   useEffect(() => {
     if (svgContainerRef.current && svgPreview && !error) {
@@ -168,6 +185,13 @@ export default function SvgToCodeConverter() {
               <ClipboardCopy className="mr-2 h-4 w-4" />
               {isCopied ? 'Copied!' : 'Copy SVG code'}
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={copyDValues}
+              disabled={!svgCode || !!error}
+            >
+              Copy D Values
+            </Button>
           </div>
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-2">SVG Preview</h3>
@@ -183,7 +207,7 @@ export default function SvgToCodeConverter() {
                 onClick={downloadSVG}
                 disabled={!svgCode || !!error}
               >
-                <Download className="mr-2 h-4 w-4" /> Download SVG
+                Download SVG
               </Button>
             </div>
           </div>
