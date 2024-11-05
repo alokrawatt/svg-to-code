@@ -6,7 +6,7 @@ import Link from 'next/link';
 const Header: React.FC = () => {
     return (
         <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
-            <div className="text-center flex-1">
+            <div className="flex-1 text-center">
                 <h1 className="text-3xl font-bold">SVG to Code Converter</h1>
                 <p>Convert your SVG files to code effortlessly!</p>
             </div>

@@ -76,19 +76,31 @@ export default function SvgToCodeConverter() {
 
   const downloadSVG = useCallback(() => {
     try {
-      const blob = new Blob([svgCode], { type: 'image/svg+xml' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'converted-image.svg'
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+        // Create a temporary SVG element to modify its attributes
+        const tempSvg = new DOMParser().parseFromString(svgCode, "image/svg+xml");
+        const svgElement = tempSvg.querySelector('svg');
+
+        if (svgElement) {
+            // Set width and height to ensure proper scaling
+            svgElement.setAttribute('width', '800'); // Set desired width
+            svgElement.setAttribute('height', '600'); // Set desired height
+        }
+
+        const updatedSvgCode = new XMLSerializer().serializeToString(tempSvg);
+        const blob = new Blob([updatedSvgCode], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'converted-image.svg';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     } catch (err) {
-      setError('Failed to download SVG')
+        setError('Failed to download SVG');
     }
-  }, [svgCode])
+}, [svgCode]);
 
   const copyDValues = useCallback(() => {
     const parser = new DOMParser();
