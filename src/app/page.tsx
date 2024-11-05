@@ -6,7 +6,7 @@ import Footer from '@/components/ui/footer'
 export const metadata: Metadata = {
   title: 'SVG to Code Converter',
   description: 'Convert SVG files to code and vice versa with this easy-to-use tool',
-  keywords: ['SVG', 'code converter', 'SVG to code', 'code to SVG'],
+  keywords: ['SVG', 'code converter', 'SVG to code', 'code to SVG', 'copy SVG D Values', 'd values'],
 }
 
 export default function Home() {
