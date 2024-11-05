@@ -14,7 +14,7 @@ export default function SvgToCodeConverter() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const validateSvgContent = (content: string): boolean => {
-    const trimmedContent = content.trim().replace(/<!--.*?-->/g, ''); // Remove comments
+    const trimmedContent = content.trim().replace(/<!--.*?-->/g, '');
     const svgStart = trimmedContent.toLowerCase().indexOf('<svg');
     const svgEnd = trimmedContent.toLowerCase().indexOf('</svg>');
 
@@ -37,7 +37,7 @@ export default function SvgToCodeConverter() {
       const reader = new FileReader()
       reader.onload = (e) => {
         const content = e.target?.result as string
-        console.log('Uploaded SVG content:', content); // Log the content for debugging
+        console.log('Uploaded SVG content:', content);
         if (validateSvgContent(content)) {
           setError(null)
           setSvgCode(content)

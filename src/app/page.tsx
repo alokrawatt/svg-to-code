@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import SvgToCodeConverter from '@/components/svg-to-code-converter'
 import Header from '@/components/ui/Header'
-import Footer from '@/components/ui/Footer'
 
 export const metadata: Metadata = {
   title: 'SVG to Code Converter',
@@ -16,7 +15,6 @@ export default function Home() {
       <main className="flex-grow p-4 md:p-24 bg-gray-100">
         <SvgToCodeConverter />
       </main>
-      <Footer />
     </div>
   )
 }
