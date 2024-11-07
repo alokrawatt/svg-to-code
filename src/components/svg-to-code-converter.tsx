@@ -1,7 +1,7 @@
 "use client"
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card"
 import { ArrowLeftRight, ClipboardCopy, Upload } from 'lucide-react'
 
 export default function SvgToCodeConverter() {
@@ -76,14 +76,12 @@ export default function SvgToCodeConverter() {
 
   const downloadSVG = useCallback(() => {
     try {
-        // Create a temporary SVG element to modify its attributes
         const tempSvg = new DOMParser().parseFromString(svgCode, "image/svg+xml");
         const svgElement = tempSvg.querySelector('svg');
 
         if (svgElement) {
-            // Set width and height to ensure proper scaling
-            svgElement.setAttribute('width', '800'); // Set desired width
-            svgElement.setAttribute('height', '600'); // Set desired height
+            svgElement.setAttribute('width', '800');
+            svgElement.setAttribute('height', '600');
         }
 
         const updatedSvgCode = new XMLSerializer().serializeToString(tempSvg);
@@ -100,7 +98,7 @@ export default function SvgToCodeConverter() {
     } catch (err) {
         setError('Failed to download SVG');
     }
-}, [svgCode]);
+  }, [svgCode]);
 
   const copyDValues = useCallback(() => {
     const parser = new DOMParser();
@@ -139,18 +137,16 @@ export default function SvgToCodeConverter() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
+      <header className="flex flex-col items-center mb-4">
+        <img src="/favicon.ico" alt="Favicon" className="w-8 h-8 mb-2" />
+        <h1 className="text-3xl font-bold text-center flex items-center justify-center">
+          SVG <ArrowLeftRight className="mx-2" /> Code
+        </h1>
+        <p className="text-center mb-4">
+          Convert SVG image to code and vice versa.
+        </p>
+      </header>
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-center">
-            <img src="/favicon.ico" alt="Favicon" className="w-8 h-8 mr-2" />
-            <CardTitle className="text-3xl font-bold text-center flex items-center justify-center">
-              SVG <ArrowLeftRight className="mx-2" /> Code
-            </CardTitle>
-          </div>
-          <CardDescription className="text-center">
-            Convert SVG image to code and vice versa.
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           {error && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
