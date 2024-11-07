@@ -141,9 +141,12 @@ export default function SvgToCodeConverter() {
     <div className="container mx-auto p-4 max-w-4xl">
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center flex items-center justify-center">
-            SVG <ArrowLeftRight className="mx-2" /> Code
-          </CardTitle>
+          <div className="flex items-center justify-center">
+            <img src="/favicon.ico" alt="Favicon" className="w-8 h-8 mr-2" />
+            <CardTitle className="text-3xl font-bold text-center flex items-center justify-center">
+              SVG <ArrowLeftRight className="mx-2" /> Code
+            </CardTitle>
+          </div>
           <CardDescription className="text-center">
             Convert SVG image to code and vice versa.
           </CardDescription>
